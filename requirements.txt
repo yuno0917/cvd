@@ -1,0 +1,16 @@
+requests
+fastapi
+uvicorn
+pandas
+numpy
+transformers
+torch
+scikit-learn
+tqdm
+pyicloud
+opencv-python
+pyzbar
+keyring
+fugashi==1.2.1
+protobuf==3.20.0
+ipadic
