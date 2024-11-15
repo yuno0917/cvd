@@ -1,3 +1,5 @@
+<!-- resources/views/cvds/strong.blade.php -->
+
 @extends('layouts.app')
 
 @section('title', '色覚補正')
@@ -6,10 +8,12 @@
     <div class="container">
         <h2>色覚補正（Daltonize）</h2>
 
+        <!-- エラーメッセージの表示 -->
         @if(session('error'))
             <div class="alert alert-danger">{{ session('error') }}</div>
         @endif
 
+        <!-- Daltonize 画像アップロードフォーム -->
         <form action="{{ route('daltonize.image') }}" method="POST" enctype="multipart/form-data">
             @csrf
             <div class="form-group">
@@ -27,6 +31,12 @@
             <button type="submit" class="btn btn-primary mt-3">色覚補正を実行</button>
         </form>
 
+        <!-- デバッグ情報の表示 -->
+        @isset($correctedImage)
+            <h4 class="mt-4">補正後の画像データ長: {{ strlen($correctedImage) }}</h4>
+        @endisset
+
+        <!-- 補正後の画像表示 -->
         @isset($correctedImage)
             <h4 class="mt-4">補正後の画像:</h4>
             <img src="data:image/png;base64,{{ $correctedImage }}" alt="Corrected Image" class="img-fluid">
