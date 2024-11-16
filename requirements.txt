@@ -14,3 +14,5 @@ keyring
 fugashi==1.2.1
 protobuf==3.20.0
 ipadic
+Pillow
+python-multipart
