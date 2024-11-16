@@ -39,3 +39,4 @@ auth.json
 # python
 /app/Python/__pycache__
 /app/Python/json/
+/app/Python/models/
