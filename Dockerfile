@@ -27,6 +27,8 @@ RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 
 # LaravelプロジェクトのPythonスクリプトをコピー
 COPY ./app/Python /code/app/Python
+# モデルファイルをコピー
+COPY ./app/Python/models /code/app/Python/models
 
 # CMD echo "hello world"
 CMD ["uvicorn", "app.Python.main:app", "--reload", "--host", "0.0.0.0", "--port", "8080"]
