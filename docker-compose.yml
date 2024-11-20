@@ -1,16 +1,19 @@
 services:
     laravel.test:
         build:
-            context: './vendor/laravel/sail/runtimes/8.3'
-            dockerfile: Dockerfile
+            # context: './vendor/laravel/sail/runtimes/8.3'
+            context: .
+            dockerfile: Dockerfile.laravel
             args:
                 WWWGROUP: '${WWWGROUP}'
-        image: 'sail-8.3/app'
+        # image: 'sail-8.3/app'
         extra_hosts:
             - 'host.docker.internal:host-gateway'
         ports:
             # - '${APP_PORT:-80}:80'
             - '8000:80'
+            # - '443:443'  # 追加
+            - '8443:443'
             - '${VITE_PORT:-5173}:${VITE_PORT:-5173}'
         environment:
             WWWUSER: '${WWWUSER}'
@@ -20,13 +23,15 @@ services:
             IGNITION_LOCAL_SITES_PATH: '${PWD}'
         volumes:
             - '.:/var/www/html'
+            - './ssl:/etc/nginx/ssl'  # SSL証明書をマウント
+            - './docker/nginx/nginx.conf:/etc/nginx/nginx.conf' 
         networks:
             - sail
         depends_on:
             - mysql
             - redis
             - python
-        command: php artisan serve --host=0.0.0.0 --port=80
+        # command: php artisan serve --host=0.0.0.0 --port=80
     mysql:
         image: 'mysql/mysql-server:8.0'
         ports:
@@ -69,12 +74,13 @@ services:
     python:
         build:
             context: ./
-            dockerfile: Dockerfile
+            dockerfile: Dockerfile.python
         ports:
             - '8080:8080'
         volumes:
             - ./app/Python:/code/app/Python
             - ./storage/app/json:/code/app/json
+            - './ssl:/code/ssl'  # SSL 証明書をマウント
         environment:
             - PYTHONUNBUFFERED=1
             - ICLOUD_USERNAME=${ICLOUD_USERNAME}
