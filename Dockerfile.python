@@ -1,0 +1,41 @@
+# Dockerfile.python
+
+FROM python:3.10-slim
+
+# 環境変数を設定して、対話的な入力を抑制
+ENV DEBIAN_FRONTEND=noninteractive
+
+# システムの依存関係をインストール
+RUN apt-get update && apt-get install -y \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    libzbar0 \
+    v4l-utils \
+    ffmpeg \
+    libsm6 \
+    libxext6 \
+    tzdata \
+    && rm -rf /var/lib/apt/lists/*
+
+# タイムゾーンを設定
+RUN ln -fs /usr/share/zoneinfo/Asia/Tokyo /etc/localtime && dpkg-reconfigure --frontend noninteractive tzdata
+
+# 作業ディレクトリを設定
+WORKDIR /code
+
+# requirements.txt をコピーしてパッケージをインストール
+COPY ./requirements.txt /code/requirements.txt
+RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
+
+# アプリケーションコードをコピー
+COPY ./app/Python /code/app/Python
+COPY ./app/Python/models /code/app/Python/models
+
+# SSL 証明書をコピー
+COPY ./ssl /code/ssl
+
+# ポートを公開
+EXPOSE 8080
+
+# アプリケーションを起動
+CMD ["uvicorn", "app.Python.main:app", "--host", "0.0.0.0", "--port", "8080", "--ssl-keyfile", "/code/ssl/key.pem", "--ssl-certfile", "/code/ssl/cert.pem"]

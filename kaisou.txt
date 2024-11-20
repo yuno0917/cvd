@@ -13,8 +13,10 @@
 │   │   └── AppServiceProvider.php
 │   └── Python
 │       ├── Ipygeo.py
+│       ├── __init__.py
 │       ├── __pycache__
 │       │   ├── Ipygeo.cpython-310.pyc
+│       │   ├── __init__.cpython-310.pyc
 │       │   ├── book_camera_code.cpython-310.pyc
 │       │   ├── calil4.cpython-310.pyc
 │       │   ├── camera.cpython-310.pyc
@@ -29,6 +31,9 @@
 │       ├── json
 │       │   └── books_500.json
 │       ├── main.py
+│       ├── models
+│       │   ├── best.pt
+│       │   └── yolov8n.pt
 │       ├── recommend.py
 │       └── test.py
 ├── artisan
@@ -38,6 +43,7 @@
 │   │   ├── packages.php
 │   │   └── services.php
 │   └── providers.php
+├── cert.pem
 ├── composer.json
 ├── composer.lock
 ├── config
@@ -51,6 +57,7 @@
 │   ├── queue.php
 │   ├── services.php
 │   └── session.php
+├── corrected_image.png
 ├── database
 │   ├── factories
 │   │   └── UserFactory.php
@@ -60,8 +67,13 @@
 │   │   └── 0001_01_01_000002_create_jobs_table.php
 │   └── seeders
 │       └── DatabaseSeeder.php
+├── docker
+│   └── nginx
+│       └── nginx.conf
 ├── docker-compose.yml
+├── index.nginx-debian.html
 ├── kaisou.txt
+├── key.pem
 ├── node_modules
 │   ├── @esbuild
 │   │   └── linux-x64
@@ -408,8 +420,10 @@
 │       ├── book.blade.php
 │       ├── books
 │       │   ├── book.blade.php
+│       │   ├── daltonize.blade.php
 │       │   ├── genre.blade.php
-│       │   └── library.blade.php
+│       │   ├── library.blade.php
+│       │   └── strong.blade.php:Zone.Identifier
 │       ├── cvds
 │       │   ├── judge.blade.php
 │       │   ├── judge.blade.php:Zone.Identifier
@@ -427,6 +441,9 @@
 ├── routes
 │   ├── console.php
 │   └── web.php
+├── ssl
+│   ├── cert.pem
+│   └── key.pem
 ├── storage
 │   ├── app
 │   │   ├── json
@@ -439,33 +456,42 @@
 │   │   ├── sessions
 │   │   ├── testing
 │   │   └── views
+│   │       ├── 06ba91dcd77bbdb2666b7a2ea525cedb.php
 │   │       ├── 09ee47cb6b2ead6fe59c09eda6d900b2.php
+│   │       ├── 0a6d717cf6b659829eb6db0769494796.php
 │   │       ├── 0b08c1a7b03b58915f2b6e8755e8779b.php
-│   │       ├── 0c2cbf09992c1f15dcab72ce53753796.php
 │   │       ├── 13908c918157ccfc7c05c05195757833.php
-│   │       ├── 2724acafd1f36fd8d2c6ed2706d4233d.php
+│   │       ├── 19d1ca22cd8db231f88e0685e9c3a20e.php
+│   │       ├── 1bcd5e26737acfd8a63f9a65382556cc.php
+│   │       ├── 200c951429a80c460d7f62b1ff8a9fe5.php
 │   │       ├── 275c7c02e2528e6029079c885e2d2418.php
-│   │       ├── 2936caef07fd4ce0aef8c7057afc08fb.php
 │   │       ├── 368072756c233ac30f0cf310e266ea82.php
 │   │       ├── 419551074a50fbe34ef86a0e07ca7190.php
-│   │       ├── 5c2001e939204ec0b7ec56c9a9f31d3d.php
-│   │       ├── 6a4b2cf155c86436b8c0231349f36012.php
+│   │       ├── 478af7813e098af0194f54c274811c84.php
+│   │       ├── 49ebf7c73024cd78137beb549c385441.php
+│   │       ├── 63b687659f76ea8c8bcfcab8a2768d7b.php
+│   │       ├── 72649fb1bd5f0c5d391626a25979052a.php
 │   │       ├── 7e33b743a27113c4160f4c552f8b4db1.php
 │   │       ├── 8af96f1aa4ca539680bbb419b6450c05.php
 │   │       ├── 8b77322ea40de4645844c2e3622c3810.php
 │   │       ├── 931737c889bcb943f8fc79654d164835.php
+│   │       ├── 94559a4f540edd5209ca20a9ad4b0c79.php
 │   │       ├── a120438d505ca9da755be63e962e88d7.php
 │   │       ├── a3557068ed5b47425d76d1f6f3777346.php
 │   │       ├── a409957c32073e5572a809a8a11b2836.php
 │   │       ├── a43dffac7f28722de66800e4b9a5f5b9.php
 │   │       ├── a6e017772dac798c684f8ca4ea6a433e.php
 │   │       ├── ac95352bcdc7cb6b645348f21d9bb43e.php
-│   │       ├── afdd9a7baac19e99f889c2f143fe9931.php
 │   │       ├── b94b4d9d490df834e2ec2ca9f460a8a7.php
+│   │       ├── ba1499c840e7f87e1467f8dab814e56a.php
 │   │       ├── bae129cef9e600352d1c88ca55b5c61c.php
-│   │       ├── d3d81c8ce21c920ea9d8591fc0eb0e26.php
+│   │       ├── bf52d8d537ec09484cf860b3631e352e.php
 │   │       ├── dd310000961f2d208873a737c27d849a.php
-│   │       └── f35c1ee9486679cd0ff0ddd907b0d481.php
+│   │       ├── de391169c6612fef7a65e11c16da23fd.php
+│   │       ├── e0579471daf529ee44a3d2271794e57a.php
+│   │       ├── e8eff0724a9547614b258b8cb603ef79.php
+│   │       ├── f35c1ee9486679cd0ff0ddd907b0d481.php
+│   │       └── f812815006dfc4d94375916d0556bbdd.php
 │   └── logs
 │       └── laravel.log
 ├── tests
@@ -1478,4 +1504,4 @@
 │           └── src
 └── vite.config.js
 
-481 directories, 997 files
+485 directories, 1019 files
