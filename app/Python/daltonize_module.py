@@ -81,7 +81,7 @@ def daltonize_image(image_bytes, color_deficit='d'):
         # オリジナル画像を物体検出のソースとして使用
         results = model.predict(
             source=original_img_array,
-            conf=0.65,
+            conf=0.15,
             imgsz=640,
             verbose=False
         )
