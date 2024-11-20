@@ -4,6 +4,11 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\PythonController;
 
+
+Route::get('/', function () {
+    return view('book');
+});
+
 Route::get('/strong', function () {
     return view('cvds.strong');
 });
