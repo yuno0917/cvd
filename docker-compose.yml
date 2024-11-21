@@ -1,18 +1,14 @@
 services:
     laravel.test:
         build:
-            # context: './vendor/laravel/sail/runtimes/8.3'
             context: .
             dockerfile: Dockerfile.laravel
             args:
                 WWWGROUP: '${WWWGROUP}'
-        # image: 'sail-8.3/app'
         extra_hosts:
             - 'host.docker.internal:host-gateway'
         ports:
-            # - '${APP_PORT:-80}:80'
             - '8000:80'
-            # - '443:443'  # 追加
             - '8443:443'
             - '${VITE_PORT:-5173}:${VITE_PORT:-5173}'
         environment:
@@ -21,10 +17,15 @@ services:
             XDEBUG_MODE: '${SAIL_XDEBUG_MODE:-off}'
             XDEBUG_CONFIG: '${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal}'
             IGNITION_LOCAL_SITES_PATH: '${PWD}'
+            PHP_INI_UPLOAD_MAX_FILESIZE: "50M"
+            PHP_INI_POST_MAX_SIZE: "50M"
+            PHP_INI_MEMORY_LIMIT: "256M"
+            NGINX_CLIENT_MAX_BODY_SIZE: "50M"
         volumes:
             - '.:/var/www/html'
-            - './ssl:/etc/nginx/ssl'  # SSL証明書をマウント
-            - './docker/nginx/nginx.conf:/etc/nginx/nginx.conf' 
+            - './ssl:/etc/nginx/ssl'
+            - './docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro'
+            - './docker/php/custom.ini:/usr/local/etc/php/conf.d/custom.ini:ro'
         networks:
             - sail
         depends_on:
