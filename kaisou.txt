@@ -1,5 +1,6 @@
 .
-├── Dockerfile
+├── Dockerfile.laravel
+├── Dockerfile.python
 ├── README.md
 ├── app
 │   ├── Http
@@ -68,8 +69,11 @@
 │   └── seeders
 │       └── DatabaseSeeder.php
 ├── docker
-│   └── nginx
-│       └── nginx.conf
+│   ├── nginx
+│   │   ├── default.conf
+│   │   └── nginx.conf
+│   └── supervisor
+│       └── supervisord.conf
 ├── docker-compose.yml
 ├── index.nginx-debian.html
 ├── kaisou.txt
@@ -1504,4 +1508,4 @@
 │           └── src
 └── vite.config.js
 
-485 directories, 1019 files
+486 directories, 1022 files
