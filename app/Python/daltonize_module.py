@@ -8,8 +8,8 @@ from ultralytics import YOLO
 
 # モデルファイルのパスを指定
 #MODEL_PATH = os.path.join(os.path.dirname(__file__), 'models', 'best.pt')#yakiniku
-#MODEL_PATH = os.path.join(os.path.dirname(__file__), 'models', 'yolov8n.pt')
-MODEL_PATH = os.path.join(os.path.dirname(__file__), 'models', 'banana_e50.pt')
+MODEL_PATH = os.path.join(os.path.dirname(__file__), 'models', 'yolov8n.pt')
+#MODEL_PATH = os.path.join(os.path.dirname(__file__), 'models', 'banana_e50.pt')
 # YOLO モデルのロード（初期化時に一度だけ行う）
 try:
     model = YOLO(MODEL_PATH)
