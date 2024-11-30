@@ -146,15 +146,27 @@ class BookController extends Controller
     {
         $measurementDataJson = $request->input('measurement_data');
         $measurementData = json_decode($measurementDataJson, true);
- 
-         // 強度を計算
+
+        // 強度を計算
         $intensity = $this->calculateIntensity($measurementData);
- 
+
+        // セッションから type_result を取得
+        $typeResult = $request->session()->get('type_result');
+
+        // タイプに応じて閾値を設定
+        if ($typeResult == 'type1') {
+            $threshold = 15;
+        } elseif ($typeResult == 'type2') {
+            $threshold = 22;
+        } else {
+            // 判定不能または不明なタイプの場合、judge ページに戻す
+            return redirect()->route('judge')->with('message', '色覚異常のタイプが不明です。もう一度お試しください。');
+        }
+
         // 強度をセッションに保存
         $request->session()->put('intensity', $intensity);
- 
+
         // 強度に応じてページをリダイレクト
-        $threshold = 40; // 適切な閾値を設定
         if ($intensity > $threshold) {
             return redirect()->route('strong');
         } else {
@@ -183,15 +195,17 @@ class BookController extends Controller
         return $totalAverage / $count;
     }
     // strong ページの表示
-    public function showStrong()
+    public function showStrong(Request $request)
     {
-        return view('cvds.strong');
+        $intensity = $request->session()->get('intensity');
+        return view('cvds.strong', ['intensity' => $intensity]);
     }
 
     // weak ページの表示
-    public function showWeak()
+    public function showWeak(Request $request)
     {
-        return view('cvds.weak');
+        $intensity = $request->session()->get('intensity');
+        return view('cvds.weak', ['intensity' => $intensity]);
     }
 }
 
