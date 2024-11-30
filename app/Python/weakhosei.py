@@ -1,8 +1,6 @@
-#weakhosei.py
 from enum import Enum
 import numpy as np
 import cv2
-import sys
 
 # 色覚特性の種類を定義
 class Deficiency(Enum):
@@ -99,26 +97,14 @@ def get_matrix_index(deficiency_type, numerical_value):
         index = 0  # デフォルトの変換行列
     return index
 
-def main():
-    # コマンドライン引数の取得
-    if len(sys.argv) < 4:
-        print("使用法: python script_name.py deficiency_type numerical_value input_image.png")
-        print("deficiency_type: 'protan' または 'deutan'")
-        print("numerical_value: 数値 (整数)")
-        sys.exit(1)
-
-    deficiency_type_input = sys.argv[1]
-    numerical_value_input = int(sys.argv[2])
-    input_image_path = sys.argv[3]
-
+def correct_image(deficiency_type_input, numerical_value_input, input_image_path):
     # 色覚特性の設定
     if deficiency_type_input.lower() == 'protan':
         deficiency_enum = Deficiency.PROTAN
     elif deficiency_type_input.lower() == 'deutan':
         deficiency_enum = Deficiency.DEUTAN
     else:
-        print("未知の色覚特性:", deficiency_type_input)
-        sys.exit(1)
+        raise ValueError(f"未知の色覚特性: {deficiency_type_input}")
 
     numerical_value = numerical_value_input
 
@@ -134,8 +120,7 @@ def main():
     # 画像の読み込み
     img = cv2.imread(input_image_path)
     if img is None:
-        print("画像を読み込めませんでした。ファイルパスとファイル名を確認してください。")
-        exit()
+        raise FileNotFoundError("画像を読み込めませんでした。ファイルパスとファイル名を確認してください。")
 
     # BGR→RGB変換と正規化
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -163,7 +148,4 @@ def main():
     # 変換後の画像を保存
     output_image_path = f'corrected_{deficiency_type_input}_{numerical_value}.png'
     cv2.imwrite(output_image_path, img_transformed_uint8)
-    print(f"補正画像を {output_image_path} に保存しました。")
-
-if __name__ == "__main__":
-    main()
+    return output_image_path
