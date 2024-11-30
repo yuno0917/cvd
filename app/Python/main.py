@@ -3,6 +3,7 @@
 from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import StreamingResponse
 from .daltonize_module import daltonize_image
+#from .weakhosei import correct_image 
 import io
 
 app = FastAPI()
