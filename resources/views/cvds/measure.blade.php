@@ -11,12 +11,6 @@
             gap: 20px;
             padding: 20px;
         }
-        .type-selection {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            margin-bottom: 20px;
-        }
         .stimuli-container {
             display: flex;
             gap: 40px;
@@ -86,36 +80,41 @@
 <body>
     <div class="container">
         <h1>色覚異常強度測定システム</h1>
-        <div class="type-selection">
-            <label>種類を選択してください:</label>
-            <button id="type1-button">1型</button>
-            <button id="type2-button">2型</button>
-        </div>
-        <div class="color-name" id="current-color">Gray</div>
-        <div class="stimuli-container">
-            <div>
-                <h2>参照刺激</h2>
-                <div id="reference" class="color-swatch"></div>
+
+        <!-- 測定結果送信用フォーム -->
+        <form id="measure-form" action="{{ route('measure.result') }}" method="POST">
+            @csrf
+            <input type="hidden" name="measurement_data" id="measurement_data">
+            <div class="color-name" id="current-color">灰色</div>
+            <div class="stimuli-container">
+                <div>
+                    <h2>参照刺激</h2>
+                    <div id="reference" class="color-swatch"></div>
+                </div>
+                <div>
+                    <h2>変調刺激</h2>
+                    <div id="test" class="color-swatch"></div>
+                </div>
             </div>
-            <div>
-                <h2>変調刺激</h2>
-                <div id="test" class="color-swatch"></div>
+            <div class="controls">
+                <div class="slider-container">
+                    <input type="range" id="deltaE-slider" class="slider" 
+                           min="0" max="80" value="0" step="0.1">
+                    <div class="slider-label">ΔE値をスライダーで調整（0-80）</div>
+                </div>
+                <div class="fine-controls">
+                    <button type="button" id="decrease">ΔE - 1</button>
+                    <div class="value-display">ΔE = <span id="deltaE-value">0</span></div>
+                    <button type="button" id="increase">ΔE + 1</button>
+                </div>
+                <button type="button" id="next-color">次の色へ</button>
+                <button type="button" id="show-results">結果を表示</button>
             </div>
-        </div>
-        <div class="controls">
-            <div class="slider-container">
-                <input type="range" id="deltaE-slider" class="slider" 
-                       min="0" max="80" value="0" step="0.1">
-                <div class="slider-label">ΔE値をスライダーで調整（0-80）</div>
-            </div>
-            <div class="fine-controls">
-                <button id="decrease">ΔE - 1</button>
-                <div class="value-display">ΔE = <span id="deltaE-value">0</span></div>
-                <button id="increase">ΔE + 1</button>
-            </div>
-            <button id="next-color">次の色へ</button>
-            <button id="show-results">結果を表示</button>
-        </div>
+            <!-- 結果を送信するボタン（非表示） -->
+            <button type="submit" id="submit-measurement" style="display: none;">結果を送信</button>
+        </form>
+
+        <!-- 測定結果を表示するエリア -->
         <div id="results" class="results" style="display: none;">
             <h2>測定結果</h2>
             <div id="results-content"></div>
@@ -123,8 +122,10 @@
     </div>
 
     <script>
-        // 色のデータ定義
+        // コントローラーから渡された typeResult を使用
+        let currentType = {{ json_encode($typeResult == 'type1' ? 1 : 2) }};
 
+        // 色のデータ定義
         const colorDataType1 = {
             Gray: { Y: 25.468, x: 0.313, y: 0.329, name: "灰色" },
             Yellow: { Y: 25.468, x: 0.403, y: 0.485, name: "黄色" },
@@ -151,12 +152,9 @@
         const convergencePointType1 = { x: 0.7506, y: 0.2495, Y: 25.468 };
         const convergencePointType2 = { x: 1.4292, y: -0.4292, Y: 25.468 };
 
-        // 現在のタイプ (1 or 2)
-        let currentType = 1;
-
         // 現在使用するデータ
-        let colorData = colorDataType1;
-        let convergencePoint = convergencePointType1;
+        let colorData = (currentType === 1) ? colorDataType1 : colorDataType2;
+        let convergencePoint = (currentType === 1) ? convergencePointType1 : convergencePointType2;
 
         // 参照白色点（D65）
         const refWhite = { X: 95.047, Y: 100.000, Z: 108.883 };
@@ -250,12 +248,18 @@
                 // 方向に応じて計算式を変更
                 const x = isPositive ?
                     currentColor.x + t * (convergencePoint.x - currentColor.x) :
-                    currentColor.x + t * (-convergencePoint.x + currentColor.x);
+                    currentColor.x - t * (convergencePoint.x - currentColor.x);
                 const y = isPositive ?
                     currentColor.y + t * (convergencePoint.y - currentColor.y) :
-                    currentColor.y + t * (-convergencePoint.y + currentColor.y);
+                    currentColor.y - t * (convergencePoint.y - currentColor.y);
                 const Y = currentColor.Y;
                 
+                // 色度座標が有効な範囲内にあるか確認
+                if (x < 0 || x > 1 || y < 0 || y > 1 || x + y > 1) {
+                    t += tIncrement;
+                    continue;
+                }
+
                 const XYZ = xyYtoXYZ(x, y, Y);
                 const Lab = XYZtoLab(XYZ.X, XYZ.Y, XYZ.Z);
                 
@@ -274,20 +278,21 @@
         // 結果を保存する関数
         function saveResult() {
             const direction = currentState.isPositiveDirection ? 'positive' : 'negative';
-            if (!results[direction][currentState.colorKey]) {
-                results[direction][currentState.colorKey] = currentDeltaE;
-            }
+            results[direction][currentState.colorKey] = currentDeltaE;
         }
 
         // 次の測定に進む関数
         function nextMeasurement() {
             saveResult();  // 現在の結果を保存
 
-            // 最後の色（Blue）の負方向の測定時の特別処理
-            if (currentState.colorKey === 'Blue' && !currentState.isPositiveDirection) {
+            const colorKeys = Object.keys(colorData);
+            const totalMeasurements = colorKeys.length * 2; // 正方向と負方向
+
+            // 測定が完了した場合
+            if (currentState.colorIndex === colorKeys.length - 1 && !currentState.isPositiveDirection) {
                 document.getElementById('next-color').style.display = 'none';
                 document.getElementById('show-results').style.display = 'block';
-                return; // これ以上状態を変更しない
+                return;
             }
 
             // 通常の状態遷移
@@ -295,7 +300,6 @@
                 currentState.isPositiveDirection = false;
             } else {
                 currentState.isPositiveDirection = true;
-                const colorKeys = Object.keys(colorData);
                 currentState.colorIndex = (currentState.colorIndex + 1) % colorKeys.length;
                 currentState.colorKey = colorKeys[currentState.colorIndex];
             }
@@ -309,35 +313,15 @@
 
         // 結果を表示する関数
         function showResults() {
-            // 最後の測定結果を確実に保存
+            // 最後の測定結果を保存
             saveResult();
 
-            const resultsContent = document.getElementById('results-content');
-            let html = '<table border="1"><tr><th>色</th><th>正方向ΔE</th><th>負方向ΔE</th><th>平均ΔE</th></tr>';
+            // 結果を取得
+            const measurementDataInput = document.getElementById('measurement_data');
+            measurementDataInput.value = JSON.stringify(results);
 
-            let totalAverage = 0;
-            let count = 0;
-
-            for (const colorKey in colorData) {
-                const positive = results.positive[colorKey] || 0;
-                const negative = results.negative[colorKey] || 0;
-                const average = (positive + negative) / 2;
-                totalAverage += average;
-                count++;
-        
-                html += `<tr>
-                <td>${colorData[colorKey].name}</td>
-                <td>${positive.toFixed(1)}</td>
-                <td>${negative.toFixed(1)}</td>
-                <td>${average.toFixed(1)}</td>
-                </tr>`;
-            }
-
-            html += `<tr><td colspan="3">全体平均</td><td>${(totalAverage / count).toFixed(1)}</td></tr>`;
-            html += '</table>';
-
-            resultsContent.innerHTML = html;
-            document.getElementById('results').style.display = 'block';
+            // フォームを送信
+            document.getElementById('submit-measurement').click();
         }
 
         // UI初期化とイベントリスナー設定
@@ -350,58 +334,12 @@
         const testStimulus = document.getElementById('test');
         const nextColorButton = document.getElementById('next-color');
         const showResultsButton = document.getElementById('show-results');
+        const currentColorName = document.getElementById('current-color');
 
         // ボタンイベントリスナー
         nextColorButton.addEventListener('click', nextMeasurement);
         showResultsButton.addEventListener('click', showResults);
         showResultsButton.style.display = 'none';
-
-        // タイプ選択ボタンのイベントリスナー
-        const type1Button = document.getElementById('type1-button');
-        const type2Button = document.getElementById('type2-button');
-
-        type1Button.addEventListener('click', () => {
-            selectType(1);
-        });
-
-        type2Button.addEventListener('click', () => {
-            selectType(2);
-        });
-
-        function selectType(type) {
-            currentType = type;
-            if (type === 1) {
-                colorData = colorDataType1;
-                convergencePoint = convergencePointType1;
-            } else if (type === 2) {
-                colorData = colorDataType2;
-                convergencePoint = convergencePointType2;
-            }
-
-            // 状態をリセット
-            currentState = {
-                colorKey: 'Gray',
-                isPositiveDirection: true,
-                colorIndex: 0
-            };
-
-            results = {
-                positive: {},
-                negative: {}
-            };
-
-            currentDeltaE = 0;
-
-            // UIを更新
-            document.getElementById('current-color').textContent = 
-                `${colorData[currentState.colorKey].name} (${currentState.isPositiveDirection ? '正' : '負'}方向)`;
-            updateColor();
-
-            // 結果表示を隠し、次へボタンを表示
-            document.getElementById('results').style.display = 'none';
-            document.getElementById('next-color').style.display = 'block';
-            document.getElementById('show-results').style.display = 'none';
-        }
 
         // 色を更新する関数
         function updateColor() {
@@ -417,7 +355,12 @@
                     `rgb(${testRGB.R}, ${testRGB.G}, ${testRGB.B})`;
                 deltaEValue.textContent = currentDeltaE.toFixed(1);
                 deltaESlider.value = currentDeltaE;
+            } else {
+                testStimulus.style.backgroundColor = 'rgb(255, 255, 255)';
             }
+
+            currentColorName.textContent = 
+                `${currentColor.name} (${currentState.isPositiveDirection ? '正' : '負'}方向)`;
         }
 
         // ボタンのイベントリスナー
@@ -441,8 +384,8 @@
             updateColor();
         });
 
-        // 初期タイプを選択
-        selectType(1);
+        // 初期表示
+        updateColor();
 
     </script>
 </body>

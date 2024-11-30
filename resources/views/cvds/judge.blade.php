@@ -120,6 +120,11 @@
         <div id="results" class="results" style="display: none;">
             <h2>判定結果</h2>
             <div id="results-content"></div>
+            <form id="judge-form" action="{{ route('judge.result') }}" method="POST">
+                @csrf
+                <input type="hidden" name="type_result" id="type_result">
+                <button type="submit" id="proceed-button" style="display: none;">次へ進む</button>
+            </form>
         </div>
     </div>
 
@@ -340,7 +345,6 @@
             }
         }
 
-        // 最終結果を表示する関数
         function showFinalResults() {
             let type1Count = userSelections.filter(selection => selection === 'type1').length;
             let type2Count = userSelections.filter(selection => selection === 'type2').length;
@@ -350,13 +354,29 @@
             if (type1Count > type2Count) {
                 resultText = `あなたは2型の色覚異常の可能性があります。（${type1Count}対${type2Count}）`;
             } else if (type2Count > type1Count) {
-                resultText = `あなたは1型の色覚異常の可能性があります。（${type2Count}対${type1Count}）`;
+                 resultText = `あなたは1型の色覚異常の可能性があります。（${type2Count}対${type1Count}）`;
             } else {
-                resultText = '判定が難しい結果となりました。';
+                 resultText = '判定が難しい結果となりました。';
             }
 
             document.getElementById('results-content').textContent = resultText;
             document.getElementById('results').style.display = 'block';
+
+            // 判定結果を取得
+            let typeResult = '';
+            if (type1Count > type2Count) {
+                typeResult = 'type2'; // 1型の色覚異常
+            } else if (type2Count > type1Count) {
+                typeResult = 'type1'; // 2型の色覚異常
+            } else {
+                typeResult = 'undetermined'; // 判定不能
+            }
+
+            // 結果をフォームに設定
+            document.getElementById('type_result').value = typeResult;
+
+            // "次へ進む" ボタンを表示
+            document.getElementById('proceed-button').style.display = 'block';
 
             // ボタンを無効化
             leftDifferentButton.disabled = true;
@@ -365,6 +385,7 @@
             decreaseButton.disabled = true;
             deltaESlider.disabled = true;
         }
+
 
         // 初期表示
         updateColor();

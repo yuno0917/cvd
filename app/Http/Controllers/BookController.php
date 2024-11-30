@@ -109,6 +109,90 @@ class BookController extends Controller
 
         return view('cvds.weak', ['processedImage' => $dataUrl]);
     }
+    public function showJudge()
+    {
+        return view('cvds.judge');
+    }
+    // judge 結果の処理
+    public function judgeResult(Request $request)
+    {
+        $typeResult = $request->input('type_result');
+
+        if ($typeResult == 'undetermined') {
+            // 判定不能の場合、メッセージを表示して戻す
+            return redirect()->route('cvds.judge')->with('message', '判定が難しい結果となりました。もう一度お試しください。');
+        }
+
+        // 判定結果をセッションに保存
+        $request->session()->put('type_result', $typeResult);
+
+        // measure ページにリダイレクト
+        return redirect()->route('measure');
+    }
+    // measure ページの表示
+    public function showMeasure(Request $request)
+    {
+        $typeResult = $request->session()->get('type_result');
+
+        if (!$typeResult) {
+            // セッションにデータがない場合、judge ページに戻す
+            return redirect()->route('cvds.judge');
+        }
+
+        return view('cvds.measure', ['typeResult' => $typeResult]);
+    }
+    // measure 結果の処理
+    public function measureResult(Request $request)
+    {
+        $measurementDataJson = $request->input('measurement_data');
+        $measurementData = json_decode($measurementDataJson, true);
+ 
+         // 強度を計算
+        $intensity = $this->calculateIntensity($measurementData);
+ 
+        // 強度をセッションに保存
+        $request->session()->put('intensity', $intensity);
+ 
+        // 強度に応じてページをリダイレクト
+        $threshold = 40; // 適切な閾値を設定
+        if ($intensity > $threshold) {
+            return redirect()->route('strong');
+        } else {
+            return redirect()->route('weak');
+        }
+    }
+    // 強度計算のヘルパーメソッド
+    private function calculateIntensity($data)
+    {
+        $totalAverage = 0;
+        $count = 0;
+ 
+        foreach ($data['positive'] as $deltaE) {
+            $totalAverage += $deltaE;
+            $count++;
+        }
+         foreach ($data['negative'] as $deltaE) {
+            $totalAverage += $deltaE;
+            $count++;
+        }
+
+        if ($count === 0) {
+            return 0;
+        }
+ 
+        return $totalAverage / $count;
+    }
+    // strong ページの表示
+    public function showStrong()
+    {
+        return view('cvds.strong');
+    }
+
+    // weak ページの表示
+    public function showWeak()
+    {
+        return view('cvds.weak');
+    }
 }
 
 

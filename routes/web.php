@@ -9,23 +9,14 @@ Route::get('/', function () {
     return view('book');
 });
 
-Route::get('/judge', function () {
-    return view('cvds.judge');
-});
+// ルート定義の整理
+Route::get('/judge', [BookController::class, 'showJudge'])->name('judge');
+Route::post('/judge/result', [BookController::class, 'judgeResult'])->name('judge.result');
+Route::get('/measure', [BookController::class, 'showMeasure'])->name('measure');
+Route::post('/measure/result', [BookController::class, 'measureResult'])->name('measure.result');
+Route::get('/strong', [BookController::class, 'showStrong'])->name('strong');
+Route::get('/weak', [BookController::class, 'showWeak'])->name('weak');
 
-
-Route::get('/measure', function () {
-    return view('cvds.measure');
-});
-
-Route::get('/strong', function () {
-    return view('cvds.strong');
-});
-
-Route::get('/weak', function () {
-    return view('cvds.weak');
-});
-
-
+// 画像処理関連のルート
 Route::post('/process-image', [BookController::class, 'processImage'])->name('process-image');
-Route::post('/process-weak-image', [BookController::class, 'processWeakImage'])->name('process-weak-image'); 
+Route::post('/process-weak-image', [BookController::class, 'processWeakImage'])->name('process-weak-image');
