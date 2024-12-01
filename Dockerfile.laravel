@@ -1,0 +1,38 @@
+# Dockerfile.laravel
+FROM laravel/sail-8.2-base:latest
+# ベースイメージとして PHP 8.2 を使用
+FROM php:8.2-fpm
+
+# 必要なパッケージをインストール
+RUN apt-get update && apt-get install -y \
+    nginx \
+    supervisor \
+    openssl \
+    tzdata \
+    procps \
+    && rm -rf /var/lib/apt/lists/*
+
+# PHP の拡張モジュールをインストール
+RUN docker-php-ext-install mysqli pdo pdo_mysql
+
+# 作業ディレクトリを設定
+WORKDIR /var/www/html
+
+# アプリケーションコードをコピー
+COPY . /var/www/html
+
+# SSL 証明書と Nginx の設定ファイルをコピー
+COPY ./ssl /etc/nginx/ssl
+COPY ./docker/nginx/nginx.conf /etc/nginx/nginx.conf
+COPY ./docker/nginx/default.conf /etc/nginx/conf.d/default.conf
+
+# Supervisor の設定ファイルをコピー
+COPY ./docker/supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+# PHPの設定をコピー
+COPY docker/php/custom.ini /usr/local/etc/php/conf.d/custom.ini
+
+# ポートを公開
+EXPOSE 80 443
+
+# コンテナ起動時に Supervisor を起動
+CMD ["/usr/bin/supervisord"]
