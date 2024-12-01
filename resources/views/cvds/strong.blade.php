@@ -3,7 +3,6 @@
 <head>
     <title>色覚補正アプリ</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- セキュアなカメラアクセスのための設定 -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';">
 </head>
 <body>
@@ -15,9 +14,10 @@
     <form id="image-form" method="POST" enctype="multipart/form-data" action="{{ route('process-image') }}">
         @csrf
         <input type="hidden" name="image" id="image-input">
+        <input type="hidden" name="deficiency_type" value="{{ $deficiencyType ?? 'd' }}">
         <button type="button" id="capture-submit" style="font-size: 1.2em; padding: 10px 20px; margin: 10px 0;">撮影して送信</button>
     </form>
-
+    
     <script>
         async function initCamera() {
             try {
