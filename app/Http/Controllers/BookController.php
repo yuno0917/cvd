@@ -13,6 +13,10 @@ class BookController extends Controller
     {
         // Base64 エンコードされた画像データを取得
         $base64Image = $request->input('image');
+        
+        // セッションから色覚タイプを取得
+        $typeResult = session('type_result');
+        $deficiencyType = $typeResult == 'type1' ? 'p' : 'd';
 
         // データ URL から Base64 部分を抽出
         $imageData = explode(',', $base64Image)[1];
@@ -26,7 +30,7 @@ class BookController extends Controller
 
         // FastAPI サーバーに画像を送信
         $client = new Client([
-            'base_uri' => 'http://python:8080', // Docker コンテナ名を使用
+            'base_uri' => 'http://python:8080',
         ]);
 
         $response = $client->post('/daltonize', [
@@ -35,6 +39,10 @@ class BookController extends Controller
                     'name'     => 'file',
                     'contents' => fopen($tempImagePath, 'r'),
                     'filename' => 'image.png',
+                ],
+                [
+                    'name'     => 'deficiency_type',
+                    'contents' => $deficiencyType,
                 ],
             ],
         ]);
@@ -49,7 +57,10 @@ class BookController extends Controller
         $processedImageBase64 = base64_encode($processedImage);
         $dataUrl = 'data:image/png;base64,' . $processedImageBase64;
 
-        return view('cvds.strong', ['processedImage' => $dataUrl]);
+        return view('cvds.strong', [
+            'processedImage' => $dataUrl,
+            'deficiencyType' => $deficiencyType
+        ]);
     }
     // 新しく追加するメソッド
     public function processWeakImage(Request $request)
@@ -203,7 +214,15 @@ class BookController extends Controller
     public function showStrong(Request $request)
     {
         $intensity = $request->session()->get('intensity');
-        return view('cvds.strong', ['intensity' => $intensity]);
+        $typeResult = $request->session()->get('type_result');
+        
+        // type1 -> p(protan), type2 -> d(deutan)に変換
+        $deficiencyType = $typeResult == 'type1' ? 'p' : 'd';
+        
+        return view('cvds.strong', [
+            'intensity' => $intensity,
+            'deficiencyType' => $deficiencyType
+        ]);
     }
 
     // weak ページの表示

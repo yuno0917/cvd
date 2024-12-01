@@ -9,16 +9,21 @@ import io
 app = FastAPI()
 
 @app.post("/daltonize")
-async def daltonize_endpoint(file: UploadFile = File(...)):
+async def daltonize_endpoint(
+    file: UploadFile = File(...),
+    deficiency_type: str = Form(default='d')  # フォームからdeficiency_typeを受け取る
+):
     # アップロードされたファイルを読み込み
     contents = await file.read()
 
-    # 画像を補正
-    processed_image_bytes = daltonize_image(contents)
+    # 画像を補正（色覚タイプを指定）
+    processed_image_bytes = daltonize_image(contents, color_deficit=deficiency_type)
 
     # バイトデータをストリームとして返す
     return StreamingResponse(io.BytesIO(processed_image_bytes), media_type="image/png")
 # 新しいエンドポイントを追加
+
+
 @app.post("/weakhosei")
 async def weakhosei_endpoint(
     deficiency_type: str = Form(...),
