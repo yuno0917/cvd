@@ -76,7 +76,7 @@ class BookController extends Controller
 
         // FastAPI サーバーに画像を送信
         $client = new Client([
-            'base_uri' => 'http://python:8080', // Docker コンテナ名を使用
+            'base_uri' => 'http://python:8080',
         ]);
 
         $response = $client->post('/weakhosei', [
@@ -107,7 +107,12 @@ class BookController extends Controller
         $processedImageBase64 = base64_encode($processedImage);
         $dataUrl = 'data:image/png;base64,' . $processedImageBase64;
 
-        return view('cvds.weak', ['processedImage' => $dataUrl]);
+        // フォームの値を保持するために、入力値も一緒にビューに渡す
+        return view('cvds.weak', [
+            'processedImage' => $dataUrl,
+            'deficiencyType' => $request->input('deficiency_type'),
+            'numericalValue' => $request->input('numerical_value')
+        ]);
     }
     public function showJudge()
     {
