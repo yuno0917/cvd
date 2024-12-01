@@ -204,8 +204,26 @@ class BookController extends Controller
     // weak ページの表示
     public function showWeak(Request $request)
     {
-        $intensity = $request->session()->get('intensity');
-        return view('cvds.weak', ['intensity' => $intensity]);
+        // セッションから値を取得し、デフォルト値も設定
+        $intensity = $request->session()->get('intensity', 0);
+        $typeResult = $request->session()->get('type_result', 'type1');
+        
+        // 色覚タイプを変換
+        $deficiencyType = 'protan'; // デフォルト値
+        if ($typeResult == 'type1') {
+            $deficiencyType = 'protan';
+        } elseif ($typeResult == 'type2') {
+            $deficiencyType = 'deutan';
+        }
+
+        // ビューに渡すデータを配列にまとめる
+        $data = [
+            'intensity' => $intensity,
+            'deficiencyType' => $deficiencyType,
+            'numericalValue' => $intensity ? round($intensity) : 0
+        ];
+
+        return view('cvds.weak', $data);
     }
 }
 
