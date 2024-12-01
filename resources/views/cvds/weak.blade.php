@@ -3,7 +3,6 @@
 <head>
     <title>弱色覚補正アプリ</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- セキュアなカメラアクセスのための設定 -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';">
 </head>
 <body>
@@ -16,15 +15,14 @@
         @csrf
         <input type="hidden" name="image" id="image-input">
 
-        <!-- 新しく追加したフィールド -->
         <label for="deficiency_type">色覚特性:</label>
         <select name="deficiency_type" id="deficiency_type">
-            <option value="protan">Protan（1型色覚）</option>
-            <option value="deutan">Deutan（2型色覚）</option>
+            <option value="protan" {{ isset($deficiencyType) && $deficiencyType == 'protan' ? 'selected' : '' }}>Protan（1型色覚）</option>
+            <option value="deutan" {{ isset($deficiencyType) && $deficiencyType == 'deutan' ? 'selected' : '' }}>Deutan（2型色覚）</option>
         </select>
         <br>
         <label for="numerical_value">数値（整数）:</label>
-        <input type="number" name="numerical_value" id="numerical_value" required>
+        <input type="number" name="numerical_value" id="numerical_value" value="{{ $numericalValue ?? 0 }}" required>
         <br>
 
         <button type="button" id="capture-submit" style="font-size: 1.2em; padding: 10px 20px; margin: 10px 0;">撮影して送信</button>
