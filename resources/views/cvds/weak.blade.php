@@ -17,15 +17,22 @@
 
         <label for="deficiency_type">色覚特性:</label>
         <select name="deficiency_type" id="deficiency_type">
-            <option value="protan" {{ isset($deficiencyType) && $deficiencyType == 'protan' ? 'selected' : '' }}>Protan（1型色覚）</option>
-            <option value="deutan" {{ isset($deficiencyType) && $deficiencyType == 'deutan' ? 'selected' : '' }}>Deutan（2型色覚）</option>
+            <option value="protan" {{ (old('deficiency_type', $deficiencyType ?? '') == 'protan') ? 'selected' : '' }}>
+                Protan（1型色覚）
+            </option>
+            <option value="deutan" {{ (old('deficiency_type', $deficiencyType ?? '') == 'deutan') ? 'selected' : '' }}>
+                Deutan（2型色覚）
+            </option>
         </select>
         <br>
         <label for="numerical_value">数値（整数）:</label>
-        <input type="number" name="numerical_value" id="numerical_value" value="{{ $numericalValue ?? 0 }}" required>
+        <input type="number" name="numerical_value" id="numerical_value" 
+               value="{{ old('numerical_value', $numericalValue ?? 0) }}" required>
         <br>
 
-        <button type="button" id="capture-submit" style="font-size: 1.2em; padding: 10px 20px; margin: 10px 0;">撮影して送信</button>
+        <button type="button" id="capture-submit" style="font-size: 1.2em; padding: 10px 20px; margin: 10px 0;">
+            撮影して送信
+        </button>
     </form>
 
     <script>
@@ -105,9 +112,11 @@
         }
     </style>
 
-    @if(isset($processedImage))
+@if(isset($processedImage))
         <h2>補正済み画像</h2>
-        <img src="{{ $processedImage }}" alt="補正済み画像" style="max-width: 100%; height: auto;">
-    @endif
+        <div style="margin-top: 20px; margin-bottom: 20px;">
+            <img src="{{ $processedImage }}" alt="補正済み画像" style="max-width: 100%; height: auto;">
+        </div>
+@endif
 </body>
 </html>
